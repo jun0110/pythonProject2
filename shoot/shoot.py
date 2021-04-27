@@ -12,6 +12,40 @@ rockImage = ['rock01.png', 'rock02.png', 'rock03.png', 'rock04.png', 'rock05.png
              'rock21.png', 'rock22.png', 'rock23.png', 'rock24.png', 'rock25.png',
              'rock26.png', 'rock27.png', 'rock28.png', 'rock29.png', 'rock30.png']
 
+
+def writeScore(count):
+    global gamePad
+    font = pygame.font.Font('NanumGothic.ttf', 20)
+    text = font.render('파괴한 운석 수:' + str(count), True, (255, 255, 255))
+    gamePad.blit(text, (10, 0))
+
+def writePassed(count):
+    global gamePad
+    font = pygame.font.Font('NanumGothic.ttf', 20)
+    text = font.render('놓친 운석:' + str(count), True, (255, 0, 0))
+    gamePad.blit(text, (360, 0))
+
+def writeMessage(text):
+    global gamePad, gameoverSound
+    textfont = pygame.font.Font('NanumGothic.ttf', 80)
+    text = textfont.render(text, True, (255,0,0))
+    textpos = text.get_rect()
+    textpos.center = (padWidth/2, padHeight/2)
+    gamePad.blit(text, textpos)
+    pygame.mixer.music.stop()
+    gameoverSound.play()
+    sleep(2)
+    pygame.mixer.music.play(-1)
+    runGame()
+
+def crash():
+    global gamePad
+    writeMessage('전투기 파괴!')
+
+def gameOver():
+    global gamePad
+    writeMessage('게임 오버')
+
 def drawObject(obj, x, y):
     global gamePad
     gamePad.blit(obj, (x, y))
@@ -43,7 +77,7 @@ def runGame():
     rock = pygame.image.load(random.choice(rockImage))
     rockSize = rock.get_rect().size
     rockWidth = rockSize[0]
-    rockHight = rockSize[1]
+    rockHeight = rockSize[1]
 
     rockX = random.randrange(0, padWidth - rockWidth)
     rockY = 0
@@ -85,12 +119,23 @@ def runGame():
         elif x > padWidth - fighterWidth:
             x = padWidth - fighterWidth
 
+        if y < rockY + rockHeight:
+            if(rockX > x and rockX < x + fighterWidth) or \
+                    (rockX + rockWidth > x and rockX + rockWidth < x + fighterWidth):
+                crash()
+
         drawObject(fighter, x, y)
 
         if len(missileXY) != 0:
             for i, bxy in enumerate(missileXY):
                 bxy[1] -= 10
                 missileXY[i][1] = bxy[1]
+
+                if bxy[1] < rockY:
+                    if bxy[0] > rockX and bxy[0] < rockX + rockWidth:
+                        missileXY.remove(bxy)
+                        isShot = True
+                        shotCount += 1
 
                 if bxy[1] <= 0:
                     try:
@@ -102,21 +147,46 @@ def runGame():
             for bx, by in missileXY:
                 drawObject(missile, bx, by)
 
+        writeScore(shotCount)
+
         rockY += rockSpeed
 
         if rockY > padHeight:
             rock = pygame.image.load(random.choice(rockImage))
             rockSize = rock.get_rect().size
             rockWidth = rockSize[0]
-            rockHight = rockSize[1]
+            rockHeight = rockSize[1]
             rockX = random.randrange(0, padWidth - rockWidth)
             rockY = 0
+            rockPassed += 1
+
+        if rockPassed == 3:
+            gameOver()
+
+        writePassed(rockPassed)
+
+        rockY += rockSpeed
+
+        if isShot:
+            drawObject(explosion, rockX, rockY)
+
+            rock = pygame.image.load(random.choice(rockImage))
+            rockSize = rock.get_rect().size
+            rockWidth = rockSize[0]
+            rockHeight = rockSize[1]
+            rockX = random.randrange(0, padWidth - rockWidth)
+            rockY = 0
+            isShot = False
+
+            rockSpeed += 0.02
+            if rockSpeed >= 10:
+                rockSpeed = 10
 
         drawObject(rock, rockX, rockY)
 
         pygame.display.update()
 
-        clock().tick(60)
+        clock().tick(80)
 
     pygame.quit()
 
