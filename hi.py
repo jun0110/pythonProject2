@@ -65,27 +65,7 @@ def trs(inch):
 
     print("{0} inch => {1} cm".format(inch, cm_tr))
 
-
-
-num_1 = int(input("첫번째 숫자를 입력하세요:"))
-num_2 = input("+,-,*,/ 중 선택하세요:")
-num_3 = int(input("두번째 숫자를 입력하세요:"))
-
-print(type(num_1))
-print(type(num_3))
-
-
-
-if type(num_1) and type(num_3) == int:
-    if num_2 == "+":
-        print(f"{num_1} {num_2} {num_3} = {num_1 + num_3}")
-    elif num_2 == "-":
-        print(f"{num_1} {num_2} {num_3} = {num_1 - num_3}")
-    elif num_2 == "*":
-        print(f"{num_1} {num_2} {num_3} = {num_1 * num_3}")
-    elif num_2 == "/":
-        print(f"{num_1} {num_2} {num_3} = {num_1 / num_3:.2f}")
-    else:
-        print(f"{num_2}는 지원하지 않는 기호입니다")
-else:
-    print("정수만 입력해 주세요")
+x = 14
+while x < 36:
+    x=x +1
+    print(f"{x}회차")
